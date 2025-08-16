@@ -1,6 +1,6 @@
 {
   "name": "playwright-report-uploader",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Playwright plugin for automatic HTML report upload to cloud providers",
   "main": "lib/index.js",
   "scripts": {
