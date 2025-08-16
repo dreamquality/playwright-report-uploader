@@ -1,0 +1,11 @@
+{
+  "provider": "aws",
+  "reportDir": "./playwright-report",
+  "outputDir": "./upload-metadata",
+  "awsRegion": "us-east-1",
+  "awsBucket": "my-playwright-reports",
+  "awsPrefix": "reports/",
+  "publicAccess": true,
+  "generateIndex": true,
+  "retentionDays": 30
+}

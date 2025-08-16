@@ -1,0 +1,11 @@
+{
+  "provider": "gcp",
+  "reportDir": "./playwright-report",
+  "outputDir": "./upload-metadata",
+  "gcpProjectId": "my-project-id",
+  "gcpBucket": "playwright-reports",
+  "gcpKeyFilePath": "./service-account-key.json",
+  "gcpPrefix": "reports/",
+  "publicAccess": true,
+  "generateIndex": true
+}

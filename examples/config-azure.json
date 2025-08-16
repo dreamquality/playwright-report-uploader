@@ -1,0 +1,10 @@
+{
+  "provider": "azure",
+  "reportDir": "./playwright-report",
+  "outputDir": "./upload-metadata",
+  "azureConnectionString": "DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=mykey;EndpointSuffix=core.windows.net",
+  "azureContainer": "playwright-reports",
+  "azurePrefix": "reports/",
+  "publicAccess": true,
+  "generateIndex": true
+}
