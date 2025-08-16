@@ -14,7 +14,7 @@ export class GcpUploader {
   constructor(config: UploadConfig) {
     this.config = config;
     
-    const storageOptions: any = {
+    const storageOptions: { projectId?: string; keyFilename?: string } = {
       projectId: config.gcpProjectId
     };
     
@@ -53,9 +53,9 @@ export class GcpUploader {
       const url = this.config.publicAccess 
         ? `https://storage.googleapis.com/${this.config.gcpBucket}/${objectName}`
         : await file.getSignedUrl({
-            action: "read",
-            expires: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days
-          }).then(urls => urls[0]);
+          action: "read",
+          expires: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days
+        }).then(urls => urls[0]);
       
       return {
         success: true,

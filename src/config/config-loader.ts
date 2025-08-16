@@ -67,7 +67,7 @@ export async function loadConfig(configPath?: string): Promise<UploadConfig> {
   const config: UploadConfig = {
     ...defaultConfig,
     ...fileConfig,
-    ...Object.fromEntries(Object.entries(envConfig).filter(([_, v]) => v !== undefined))
+    ...Object.fromEntries(Object.entries(envConfig).filter(([, v]) => v !== undefined))
   } as UploadConfig;
 
   return config;
@@ -78,7 +78,7 @@ export async function loadConfig(configPath?: string): Promise<UploadConfig> {
  * @param config The upload configuration
  * @param metadata The metadata to save
  */
-export async function saveMetadata(config: UploadConfig, metadata: Record<string, any>): Promise<void> {
+export async function saveMetadata(config: UploadConfig, metadata: Record<string, unknown>): Promise<void> {
   if (!config.outputDir) {
     return;
   }

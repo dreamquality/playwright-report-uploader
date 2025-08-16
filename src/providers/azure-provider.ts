@@ -1,4 +1,4 @@
-import { BlobServiceClient, StorageSharedKeyCredential } from "@azure/storage-blob";
+import { BlobServiceClient } from "@azure/storage-blob";
 import fs from "fs-extra";
 import path from "path";
 import mime from "mime-types";
@@ -44,7 +44,7 @@ export class AzureUploader {
       const blockBlobClient = containerClient.getBlockBlobClient(blobName);
       const contentType = mime.lookup(filePath) || "application/octet-stream";
       
-      const uploadResult = await blockBlobClient.upload(fileContent, fileContent.length, {
+      await blockBlobClient.upload(fileContent, fileContent.length, {
         blobHTTPHeaders: {
           blobContentType: contentType
         }
