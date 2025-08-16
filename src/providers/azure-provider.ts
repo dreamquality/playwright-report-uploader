@@ -13,12 +13,14 @@ export class AzureUploader {
 
   constructor(config: UploadConfig) {
     this.config = config;
-    
+
     if (!config.azureConnectionString) {
       throw new Error("Azure connection string is required");
     }
-    
-    this.blobServiceClient = BlobServiceClient.fromConnectionString(config.azureConnectionString);
+
+    this.blobServiceClient = BlobServiceClient.fromConnectionString(
+      config.azureConnectionString,
+    );
   }
 
   /**
@@ -30,38 +32,42 @@ export class AzureUploader {
     try {
       const fileContent = await fs.readFile(filePath);
       const fileName = path.basename(filePath);
-      const blobName = this.config.azurePrefix 
+      const blobName = this.config.azurePrefix
         ? `${this.config.azurePrefix.replace(/\/$/, "")}/${fileName}`
         : fileName;
-      
-      const containerClient = this.blobServiceClient.getContainerClient(this.config.azureContainer!);
-      
+
+      const containerClient = this.blobServiceClient.getContainerClient(
+        this.config.azureContainer!,
+      );
+
       // Ensure container exists
       await containerClient.createIfNotExists({
-        access: this.config.publicAccess ? "blob" : undefined
+        access: this.config.publicAccess ? "blob" : undefined,
       });
-      
+
       const blockBlobClient = containerClient.getBlockBlobClient(blobName);
       const contentType = mime.lookup(filePath) || "application/octet-stream";
-      
+
       await blockBlobClient.upload(fileContent, fileContent.length, {
         blobHTTPHeaders: {
-          blobContentType: contentType
-        }
+          blobContentType: contentType,
+        },
       });
-      
+
       const url = blockBlobClient.url;
-      
+
       return {
         success: true,
-        url
+        url,
       };
     } catch (error) {
-      console.error(`Error uploading file to Azure: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(
+        `Error uploading file to Azure: ${error instanceof Error ? error.message : String(error)}`,
+      );
       return {
         success: false,
         url: "",
-        errors: [error instanceof Error ? error.message : String(error)]
+        errors: [error instanceof Error ? error.message : String(error)],
       };
     }
   }
@@ -73,14 +79,14 @@ export class AzureUploader {
    */
   async uploadDirectory(dirPath: string): Promise<Map<string, UploadResult>> {
     const results = new Map<string, UploadResult>();
-    
+
     try {
       const files = await fs.readdir(dirPath);
-      
+
       for (const file of files) {
         const filePath = path.join(dirPath, file);
         const stats = await fs.stat(filePath);
-        
+
         if (stats.isFile()) {
           const result = await this.uploadFile(filePath);
           results.set(filePath, result);
@@ -93,9 +99,11 @@ export class AzureUploader {
         }
       }
     } catch (error) {
-      console.error(`Error uploading directory to Azure: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(
+        `Error uploading directory to Azure: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
-    
+
     return results;
   }
 }

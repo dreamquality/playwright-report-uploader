@@ -11,13 +11,13 @@ export async function uploadReport(configPath?: string): Promise<void> {
   try {
     // Load configuration
     const config = await loadConfig(configPath);
-    
+
     // Create upload manager
     const manager = new UploadManager(config);
-    
+
     // Upload the report
     const results = await manager.uploadReport();
-    
+
     // Save metadata
     const metadata = {
       uploadDate: new Date().toISOString(),
@@ -27,15 +27,17 @@ export async function uploadReport(configPath?: string): Promise<void> {
         filePath,
         success: result.success,
         url: result.url,
-        errors: result.errors
-      }))
+        errors: result.errors,
+      })),
     };
-    
+
     await saveMetadata(config, metadata);
-    
+
     console.log("Report upload completed successfully!");
   } catch (error) {
-    console.error(`Error uploading report: ${error instanceof Error ? error.message : String(error)}`);
+    console.error(
+      `Error uploading report: ${error instanceof Error ? error.message : String(error)}`,
+    );
     throw error;
   }
 }
@@ -53,7 +55,7 @@ export class PlaywrightReportUploader {
       outputDir: "./upload-metadata",
       publicAccess: true,
       generateIndex: true,
-      ...config
+      ...config,
     } as UploadConfig;
   }
 
@@ -66,7 +68,9 @@ export class PlaywrightReportUploader {
       const manager = new UploadManager(this.config);
       await manager.uploadReport();
     } catch (error) {
-      console.error(`Auto-upload failed: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(
+        `Auto-upload failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 }

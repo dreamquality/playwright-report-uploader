@@ -21,14 +21,14 @@ export class UploadManager {
    */
   async uploadReport(): Promise<Map<string, UploadResult>> {
     console.log(`Starting upload to ${this.config.provider}...`);
-    
+
     // Check if report directory exists
-    if (!await fs.pathExists(this.config.reportDir)) {
+    if (!(await fs.pathExists(this.config.reportDir))) {
       throw new Error(`Report directory not found: ${this.config.reportDir}`);
     }
 
     let uploader: AwsUploader | AzureUploader | GcpUploader;
-    
+
     // Initialize the appropriate provider
     switch (this.config.provider) {
       case "aws":
@@ -42,7 +42,9 @@ export class UploadManager {
         break;
       case "custom":
         if (!this.config.customUploader) {
-          throw new Error("Custom uploader function is required when provider is set to custom");
+          throw new Error(
+            "Custom uploader function is required when provider is set to custom",
+          );
         }
         return await this.handleCustomUpload();
       default:
@@ -51,7 +53,7 @@ export class UploadManager {
 
     // Upload the report directory
     const results = await uploader.uploadDirectory(this.config.reportDir);
-    
+
     // Generate index.html if requested
     if (this.config.generateIndex) {
       await this.generateIndexFile(results);
@@ -59,7 +61,7 @@ export class UploadManager {
 
     // Log results
     this.logResults(results);
-    
+
     return results;
   }
 
@@ -68,10 +70,10 @@ export class UploadManager {
    */
   private async handleCustomUpload(): Promise<Map<string, UploadResult>> {
     const results = new Map<string, UploadResult>();
-    
+
     try {
       const files = await this.getAllFiles(this.config.reportDir);
-      
+
       for (const filePath of files) {
         try {
           const url = await this.config.customUploader!(this.config, filePath);
@@ -80,14 +82,16 @@ export class UploadManager {
           results.set(filePath, {
             success: false,
             url: "",
-            errors: [error instanceof Error ? error.message : String(error)]
+            errors: [error instanceof Error ? error.message : String(error)],
           });
         }
       }
     } catch (error) {
-      console.error(`Error in custom upload: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(
+        `Error in custom upload: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
-    
+
     return results;
   }
 
@@ -97,11 +101,11 @@ export class UploadManager {
   private async getAllFiles(dirPath: string): Promise<string[]> {
     const files: string[] = [];
     const items = await fs.readdir(dirPath);
-    
+
     for (const item of items) {
       const itemPath = path.join(dirPath, item);
       const stats = await fs.stat(itemPath);
-      
+
       if (stats.isFile()) {
         files.push(itemPath);
       } else if (stats.isDirectory()) {
@@ -109,20 +113,22 @@ export class UploadManager {
         files.push(...subFiles);
       }
     }
-    
+
     return files;
   }
 
   /**
    * Generates an index.html file with links to all uploaded files
    */
-  private async generateIndexFile(results: Map<string, UploadResult>): Promise<void> {
+  private async generateIndexFile(
+    results: Map<string, UploadResult>,
+  ): Promise<void> {
     const successfulUploads = Array.from(results.entries())
       .filter(([_, result]) => result.success)
       .map(([filePath, result]) => ({
         fileName: path.basename(filePath),
         url: result.url,
-        relativePath: path.relative(this.config.reportDir, filePath)
+        relativePath: path.relative(this.config.reportDir, filePath),
       }));
 
     const html = `<!DOCTYPE html>
@@ -150,12 +156,16 @@ export class UploadManager {
         <p><strong>Provider:</strong> ${this.config.provider}</p>
     </div>
     <ul class="file-list">
-        ${successfulUploads.map(file => `
+        ${successfulUploads
+          .map(
+            (file) => `
         <li class="file-item">
             <a href="${file.url}" class="file-link" target="_blank">${file.fileName}</a>
             <div class="file-path">${file.relativePath}</div>
         </li>
-        `).join("")}
+        `,
+          )
+          .join("")}
     </ul>
 </body>
 </html>`;
@@ -169,20 +179,24 @@ export class UploadManager {
    * Logs the upload results
    */
   private logResults(results: Map<string, UploadResult>): void {
-    const successful = Array.from(results.values()).filter(r => r.success).length;
+    const successful = Array.from(results.values()).filter(
+      (r) => r.success,
+    ).length;
     const failed = results.size - successful;
-    
+
     console.log(`
 Upload completed:`);
     console.log(`✅ Successful: ${successful}`);
     console.log(`❌ Failed: ${failed}`);
-    
+
     if (failed > 0) {
       console.log(`
 Failed uploads:`);
       for (const [filePath, result] of results.entries()) {
         if (!result.success) {
-          console.log(`  ${filePath}: ${result.errors?.join(", ") || "Unknown error"}`);
+          console.log(
+            `  ${filePath}: ${result.errors?.join(", ") || "Unknown error"}`,
+          );
         }
       }
     }

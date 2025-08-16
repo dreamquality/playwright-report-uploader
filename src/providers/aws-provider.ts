@@ -13,14 +13,14 @@ export class AwsUploader {
 
   constructor(config: UploadConfig) {
     this.config = config;
-    
+
     // Configure AWS SDK
     AWS.config.update({
       region: config.awsRegion,
       accessKeyId: config.awsAccessKeyId,
-      secretAccessKey: config.awsSecretAccessKey
+      secretAccessKey: config.awsSecretAccessKey,
     });
-    
+
     this.s3 = new AWS.S3();
   }
 
@@ -33,32 +33,34 @@ export class AwsUploader {
     try {
       const fileContent = await fs.readFile(filePath);
       const fileName = path.basename(filePath);
-      const key = this.config.awsPrefix 
+      const key = this.config.awsPrefix
         ? `${this.config.awsPrefix.replace(/\/$/, "")}/${fileName}`
         : fileName;
-      
+
       const contentType = mime.lookup(filePath) || "application/octet-stream";
-      
+
       const params = {
         Bucket: this.config.awsBucket!,
         Key: key,
         Body: fileContent,
         ContentType: contentType,
-        ACL: this.config.publicAccess ? "public-read" : "private"
+        ACL: this.config.publicAccess ? "public-read" : "private",
       };
-      
+
       const uploadResult = await this.s3.upload(params).promise();
-      
+
       return {
         success: true,
-        url: uploadResult.Location
+        url: uploadResult.Location,
       };
     } catch (error) {
-      console.error(`Error uploading file to S3: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(
+        `Error uploading file to S3: ${error instanceof Error ? error.message : String(error)}`,
+      );
       return {
         success: false,
         url: "",
-        errors: [error instanceof Error ? error.message : String(error)]
+        errors: [error instanceof Error ? error.message : String(error)],
       };
     }
   }
@@ -70,14 +72,14 @@ export class AwsUploader {
    */
   async uploadDirectory(dirPath: string): Promise<Map<string, UploadResult>> {
     const results = new Map<string, UploadResult>();
-    
+
     try {
       const files = await fs.readdir(dirPath);
-      
+
       for (const file of files) {
         const filePath = path.join(dirPath, file);
         const stats = await fs.stat(filePath);
-        
+
         if (stats.isFile()) {
           const result = await this.uploadFile(filePath);
           results.set(filePath, result);
@@ -90,9 +92,11 @@ export class AwsUploader {
         }
       }
     } catch (error) {
-      console.error(`Error uploading directory to S3: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(
+        `Error uploading directory to S3: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
-    
+
     return results;
   }
 }

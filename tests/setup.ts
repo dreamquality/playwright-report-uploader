@@ -6,13 +6,13 @@ jest.mock("aws-sdk", () => ({
   S3: jest.fn().mockImplementation(() => ({
     upload: jest.fn().mockReturnValue({
       promise: jest.fn().mockResolvedValue({
-        Location: "https://test-bucket.s3.amazonaws.com/test-file.html"
-      })
-    })
+        Location: "https://test-bucket.s3.amazonaws.com/test-file.html",
+      }),
+    }),
   })),
   config: {
-    update: jest.fn()
-  }
+    update: jest.fn(),
+  },
 }));
 
 // Mock Azure SDK
@@ -23,11 +23,11 @@ jest.mock("@azure/storage-blob", () => ({
         createIfNotExists: jest.fn().mockResolvedValue({}),
         getBlockBlobClient: jest.fn().mockReturnValue({
           upload: jest.fn().mockResolvedValue({}),
-          url: "https://test.blob.core.windows.net/container/test-file.html"
-        })
-      })
-    })
-  }
+          url: "https://test.blob.core.windows.net/container/test-file.html",
+        }),
+      }),
+    }),
+  },
 }));
 
 // Mock Google Cloud SDK
@@ -36,10 +36,14 @@ jest.mock("@google-cloud/storage", () => ({
     bucket: jest.fn().mockReturnValue({
       upload: jest.fn().mockResolvedValue([]),
       file: jest.fn().mockReturnValue({
-        getSignedUrl: jest.fn().mockResolvedValue(["https://storage.googleapis.com/test-bucket/test-file.html"])
-      })
-    })
-  }))
+        getSignedUrl: jest
+          .fn()
+          .mockResolvedValue([
+            "https://storage.googleapis.com/test-bucket/test-file.html",
+          ]),
+      }),
+    }),
+  })),
 }));
 
 // Console spy to reduce noise in tests

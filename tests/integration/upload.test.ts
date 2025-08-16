@@ -16,14 +16,26 @@ describe("Integration Tests", () => {
     await fs.ensureDir(reportDir);
 
     // Create sample report files
-    await fs.writeFile(path.join(reportDir, "index.html"), "<html><body>Test Report</body></html>");
-    await fs.writeFile(path.join(reportDir, "style.css"), "body { font-family: Arial; }");
-    await fs.writeFile(path.join(reportDir, "data.json"), JSON.stringify({ tests: [] }));
-    
+    await fs.writeFile(
+      path.join(reportDir, "index.html"),
+      "<html><body>Test Report</body></html>",
+    );
+    await fs.writeFile(
+      path.join(reportDir, "style.css"),
+      "body { font-family: Arial; }",
+    );
+    await fs.writeFile(
+      path.join(reportDir, "data.json"),
+      JSON.stringify({ tests: [] }),
+    );
+
     // Create subdirectory with assets
     const assetsDir = path.join(reportDir, "assets");
     await fs.ensureDir(assetsDir);
-    await fs.writeFile(path.join(assetsDir, "screenshot.png"), Buffer.from("fake-png-data"));
+    await fs.writeFile(
+      path.join(assetsDir, "screenshot.png"),
+      Buffer.from("fake-png-data"),
+    );
   });
 
   afterEach(async () => {
@@ -34,7 +46,11 @@ describe("Integration Tests", () => {
   describe("AWS Integration", () => {
     it("should upload to AWS S3 when credentials are provided", async () => {
       // Skip test if AWS credentials are not available
-      if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_BUCKET) {
+      if (
+        !process.env.AWS_ACCESS_KEY_ID ||
+        !process.env.AWS_SECRET_ACCESS_KEY ||
+        !process.env.AWS_BUCKET
+      ) {
         console.log("Skipping AWS integration test - credentials not provided");
         return;
       }
@@ -50,7 +66,7 @@ describe("Integration Tests", () => {
       const results = await manager.uploadReport();
 
       expect(results.size).toBeGreaterThan(0);
-      
+
       // Check that all uploads were successful
       for (const [filePath, result] of results.entries()) {
         expect(result.success).toBe(true);
@@ -63,8 +79,13 @@ describe("Integration Tests", () => {
   describe("Azure Integration", () => {
     it("should upload to Azure Blob Storage when credentials are provided", async () => {
       // Skip test if Azure credentials are not available
-      if (!process.env.AZURE_CONNECTION_STRING || !process.env.AZURE_CONTAINER) {
-        console.log("Skipping Azure integration test - credentials not provided");
+      if (
+        !process.env.AZURE_CONNECTION_STRING ||
+        !process.env.AZURE_CONTAINER
+      ) {
+        console.log(
+          "Skipping Azure integration test - credentials not provided",
+        );
         return;
       }
 
@@ -79,7 +100,7 @@ describe("Integration Tests", () => {
       const results = await manager.uploadReport();
 
       expect(results.size).toBeGreaterThan(0);
-      
+
       // Check that all uploads were successful
       for (const [filePath, result] of results.entries()) {
         expect(result.success).toBe(true);
@@ -109,7 +130,7 @@ describe("Integration Tests", () => {
       const results = await manager.uploadReport();
 
       expect(results.size).toBeGreaterThan(0);
-      
+
       // Check that all uploads were successful
       for (const [filePath, result] of results.entries()) {
         expect(result.success).toBe(true);
@@ -122,7 +143,7 @@ describe("Integration Tests", () => {
   describe("Custom Provider Integration", () => {
     it("should work with custom uploader function", async () => {
       const uploadedFiles: string[] = [];
-      
+
       const config = await loadConfig();
       config.provider = "custom";
       config.reportDir = reportDir;
@@ -136,7 +157,7 @@ describe("Integration Tests", () => {
 
       expect(results.size).toBeGreaterThan(0);
       expect(uploadedFiles.length).toBeGreaterThan(0);
-      
+
       // Check that all uploads were successful
       for (const [filePath, result] of results.entries()) {
         expect(result.success).toBe(true);
@@ -153,13 +174,13 @@ describe("Integration Tests", () => {
         reportDir: reportDir,
         awsBucket: "test-bucket",
         awsRegion: "us-west-2",
-        publicAccess: false
+        publicAccess: false,
       };
-      
+
       await fs.writeJson(configPath, configData);
-      
+
       const config = await loadConfig(configPath);
-      
+
       expect(config.provider).toBe("aws");
       expect(config.awsBucket).toBe("test-bucket");
       expect(config.awsRegion).toBe("us-west-2");
